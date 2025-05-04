@@ -1,0 +1,526 @@
+airflowVersion: 2.10.5
+airflow:
+  config:
+    AIRFLOW__WEBSERVER__BASE_URL: 'http://stg-airflow.rega.gov.sa'
+
+images:
+  airflow:
+    repository: aamirsyed007/rega
+    tag: latest
+    digest: null
+    pullPolicy: Always
+  useDefaultImageForMigration: false
+  migrationsWaitTimeout: 60
+  pod_template:
+    repository: null
+    tag: null
+    pullPolicy: IfNotPresent
+  flower:
+    repository: null
+    tag: null
+    pullPolicy: IfNotPresent
+  statsd:
+    repository: quay.io/prometheus/statsd-exporter
+    tag: v0.26.1
+    pullPolicy: IfNotPresent
+  redis:
+    repository: redis
+    tag: 7.2-bookworm
+    pullPolicy: IfNotPresent
+  pgbouncer:
+    repository: apache/airflow
+    tag: airflow-pgbouncer-2024.01.19-1.21.0
+    pullPolicy: IfNotPresent
+  pgbouncerExporter:
+    repository: apache/airflow
+    tag: airflow-pgbouncer-exporter-2024.06.18-0.17.0
+    pullPolicy: IfNotPresent
+  gitSync:
+    repository: registry.k8s.io/git-sync/git-sync
+    tag: v4.1.0
+    pullPolicy: IfNotPresent
+ingress:
+  enabled: true
+  web:
+    enabled: true
+    annotations: {}
+    path: /
+    pathType: ImplementationSpecific
+    host: stg-airflow.rega.gov.sa
+    hosts: []
+    ingressClassName: nginx
+    tls:
+      enabled: true
+      secretName: rega-tls-staging
+    precedingPaths: []
+    succeedingPaths: []
+
+executor: KubernetesExecutor
+
+env: []
+secret: []
+extraEnv: |
+  - name: AIRFLOW_CONN_OCI_S3_CONN
+    value: '{"conn_type": "aws", "extra": {"aws_access_key_id": "b9fd000094527840ed8749ece34cf3ab9aae3ed7","aws_secret_access_key": "tfUaba+JYtnIfIymjMLAMsKrEpskAwYGcw0UlnXriP8=", "endpoint_url": "https://axownvq9lhmx.compat.objectstorage.me-jeddah-1.oraclecloud.com:443"}}'
+  - name: AIRFLOW__CORE__XCOM_BACKEND
+    value: 'airflow.providers.common.io.xcom.backend.XComObjectStorageBackend'
+  - name: AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_PATH
+    value: 's3://oci_s3_conn@stg-airflow-logging-xcom/xcom'
+  - name: AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_THRESHOLD
+    value: '0'
+  - name: AIRFLOW__COMMON_IO__XCOM_OBJECTSTORAGE_COMPRESSION
+    value: 'zip'
+  - name: AIRFLOW__CORE_TEST_CONNECTION
+    value: 'Enabled'
+postgresql:
+  enabled: false
+data:
+  metadataSecretName: null
+  resultBackendSecretName: null
+  brokerUrlSecretName: null
+  metadataConnection:
+    user: airflow_admin
+    pass: VeryStrongPassword!123
+    protocol: postgresql
+    host: 10.247.3.9
+    port: 5432
+    db: airflow
+    sslmode: disable
+  resultBackendConnection: null
+  brokerUrl: null
+  
+# Flask secret key for Airflow Webserver: `[webserver] secret_key` in airflow.cfg
+webserverSecretKeySecretName: staging-webserver-secret
+    
+workers:
+  replicas: 1
+  revisionHistoryLimit: null
+  command: null
+  args:
+    - bash
+    - '-c'
+    - >-
+      exec \
+
+      airflow {{ semverCompare ">=2.0.0" .Values.airflowVersion | ternary
+      "celery worker" "worker" }}
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    timeoutSeconds: 20
+    failureThreshold: 5
+    periodSeconds: 60
+    command: null
+  updateStrategy: null
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
+  securityContext: {}
+  securityContexts:
+    pod: {}
+    container: {}
+  containerLifecycleHooks: {}
+  serviceAccount:
+    automountServiceAccountToken: true
+    create: true
+    name: null
+    annotations: {}
+scheduler:
+  enabled: true
+  hostAliases: []
+  livenessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 20
+    failureThreshold: 5
+    periodSeconds: 60
+    command: null
+  startupProbe:
+    failureThreshold: 6
+    periodSeconds: 10
+    timeoutSeconds: 20
+    command: null
+  replicas: 2
+  revisionHistoryLimit: null
+  command: null
+  args:
+    - bash
+    - '-c'
+    - exec airflow scheduler
+  updateStrategy: null
+  strategy: null
+  securityContext: {}
+  securityContexts:
+    pod: {}
+    container: {}
+  containerLifecycleHooks: {}
+  serviceAccount:
+    automountServiceAccountToken: true
+    create: true
+    name: null
+    annotations: {}
+  podDisruptionBudget:
+    enabled: false
+    config:
+      maxUnavailable: 1
+  resources: {}
+  safeToEvict: true
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  priorityClassName: null
+  annotations: {}
+  podAnnotations: {}
+  labels: {}
+  logGroomerSidecar:
+    enabled: true
+    command: null
+    args:
+      - bash
+      - /clean-logs
+    retentionDays: 15
+    resources: {}
+    securityContexts:
+      container: {}
+    containerLifecycleHooks: {}
+  waitForMigrations:
+    enabled: true
+    env: []
+    securityContexts:
+      container: {}
+  env: []
+webserver:
+  enabled: true
+  configMapAnnotations: {}
+  hostAliases: []
+  allowPodLogReading: true
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+    periodSeconds: 10
+    scheme: HTTP
+  readinessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+    periodSeconds: 10
+    scheme: HTTP
+  startupProbe:
+    timeoutSeconds: 20
+    failureThreshold: 6
+    periodSeconds: 10
+    scheme: HTTP
+  replicas: 2
+  revisionHistoryLimit: null
+  command: null
+  args:
+    - bash
+    - '-c'
+    - exec airflow webserver
+  serviceAccount:
+    automountServiceAccountToken: true
+    create: true
+    name: null
+    annotations: {}
+  podDisruptionBudget:
+    enabled: false
+    config:
+      maxUnavailable: 1
+  strategy: null
+  securityContext: {}
+  securityContexts:
+    pod: {}
+    container: {}
+  containerLifecycleHooks: {}
+  extraNetworkPolicies: []
+  networkPolicy:
+    ingress:
+      from: []
+      ports:
+        - port: '{{ .Values.ports.airflowUI }}'
+  resources: {}
+  defaultUser:
+    enabled: true
+    role: Admin
+    username: admin
+    email: admin@example.com
+    firstName: admin
+    lastName: user
+    password: admin
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  webserverConfig: null
+  webserverConfigConfigMapName: null
+  service:
+    type: ClusterIP
+    annotations: {}
+    ports:
+      - name: airflow-ui
+        port: '{{ .Values.ports.airflowUI }}'
+    loadBalancerIP: null
+    loadBalancerSourceRanges: []
+  nodeSelector: {}
+  priorityClassName: null
+  affinity: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  annotations: {}
+  podAnnotations: {}
+  labels: {}
+  waitForMigrations:
+    enabled: true
+    env: []
+    securityContexts:
+      container: {}
+  env: []
+triggerer:
+  enabled: true
+  replicas: 1
+  revisionHistoryLimit: null
+  command: null
+  args:
+    - bash
+    - '-c'
+    - exec airflow triggerer
+  updateStrategy: null
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
+  livenessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 20
+    failureThreshold: 5
+    periodSeconds: 60
+    command: null
+  serviceAccount:
+    automountServiceAccountToken: true
+    create: true
+    name: null
+    annotations: {}
+  securityContext: {}
+  securityContexts:
+    pod: {}
+    container: {}
+  containerLifecycleHooks: {}
+  persistence:
+    enabled: true
+    persistentVolumeClaimRetentionPolicy: null
+    size: 100Gi
+    storageClassName: null
+    fixPermissions: false
+    annotations: {}
+  resources: {}
+  terminationGracePeriodSeconds: 60
+  safeToEvict: true
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+  extraVolumeMounts: []
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  priorityClassName: null
+  annotations: {}
+  podAnnotations: {}
+  labels: {}
+  logGroomerSidecar:
+    enabled: true
+    command: null
+    args:
+      - bash
+      - /clean-logs
+    retentionDays: 15
+    resources: {}
+    securityContexts:
+      container: {}
+    containerLifecycleHooks: {}
+  waitForMigrations:
+    enabled: true
+    env: []
+    securityContexts:
+      container: {}
+  env: []
+  keda:
+    enabled: false
+    namespaceLabels: {}
+    pollingInterval: 5
+    cooldownPeriod: 30
+    minReplicaCount: 0
+    maxReplicaCount: 10
+    advanced: {}
+    query: >-
+      SELECT ceil(COUNT(*)::decimal / {{
+      .Values.config.triggerer.default_capacity }}) FROM trigger
+    usePgbouncer: true
+pgbouncer:
+  enabled: true
+  replicas: 1
+  revisionHistoryLimit: null
+  command:
+    - pgbouncer
+    - '-u'
+    - nobody
+    - /etc/pgbouncer/pgbouncer.ini
+  args: null
+  auth_type: scram-sha-256
+  auth_file: /etc/pgbouncer/users.txt
+  annotations: {}
+  podAnnotations: {}
+  serviceAccount:
+    automountServiceAccountToken: true
+    create: true
+    name: null
+    annotations: {}
+  extraNetworkPolicies: []
+  metadataPoolSize: 50
+  resultBackendPoolSize: 250
+  maxClientConn: 500
+  configSecretName: null
+  podDisruptionBudget:
+    enabled: false
+    config:
+      maxUnavailable: 1
+  resources: {}
+  service:
+    extraAnnotations: {}
+  verbose: 0
+  logDisconnections: 0
+  logConnections: 0
+  sslmode: prefer
+  ciphers: normal
+  ssl:
+    ca: null
+    cert: null
+    key: null
+  extraIniMetadata: null
+  extraIniResultBackend: null
+  extraIni: null
+  extraVolumes: []
+  extraVolumeMounts: []
+  extraContainers: []
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  priorityClassName: null
+  uid: 65534
+  securityContexts:
+    pod: {}
+    container: {}
+  containerLifecycleHooks:
+    preStop:
+      exec:
+        command:
+          - /bin/sh
+          - '-c'
+          - killall -INT pgbouncer && sleep 120
+  metricsExporterSidecar:
+    resources: {}
+    sslmode: disable
+    statsSecretName: null
+    statsSecretKey: null
+    securityContexts:
+      container: {}
+    containerLifecycleHooks: {}
+    livenessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 1
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 1
+  env: []
+ports:
+  flowerUI: 5555
+  airflowUI: 8080
+  workerLogs: 8793
+  triggererLogs: 8794
+  redisDB: 6379
+  statsdIngest: 9125
+  statsdScrape: 9102
+  pgbouncer: 6543
+  pgbouncerScrape: 9127
+cleanup:
+  enabled: true
+  schedule: '*/15 * * * *'
+  command: null
+  args:
+    - bash
+    - '-c'
+    - 'exec airflow kubernetes cleanup-pods --namespace={{ .Release.Namespace }}'
+  jobAnnotations: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  priorityClassName: null
+  podAnnotations: {}
+  labels: {}
+  resources: {}
+  serviceAccount:
+    automountServiceAccountToken: true
+    create: true
+    name: null
+    annotations: {}
+  securityContext: {}
+  env: []
+  securityContexts:
+    pod: {}
+    container: {}
+  containerLifecycleHooks: {}
+  failedJobsHistoryLimit: null
+  successfulJobsHistoryLimit: null
+config:
+  core:
+    max_active_tasks_per_dag: 100  # Set to desired value
+    parallelism: 200
+    dag_concurrency: 5
+  logging:
+    remote_logging: 'True'
+    logging_level: INFO
+    remote_base_log_folder: 's3://stg-airflow-logging-xcom/logs'
+    remote_log_conn_id: oci_s3_conn
+    delete_worker_pods: 'False'
+    encrypt_s3_logs: 'False'
+dags:
+  mountPath: null
+  persistence:
+    annotations: {}
+    enabled: false
+    size: 1Gi
+    storageClassName: null
+    accessMode: ReadWriteOnce
+    existingClaim: null
+    subPath: null
+  gitSync:
+    enabled: true
+    repo: 'https://github.com/WEDO-SOLUTIONS/momah-airflow.git'
+    branch: master
+    rev: HEAD
+    ref: master
+    depth: 1
+    maxFailures: 0
+    subPath: dags
+    period: 5s
+    wait: null
+    envFrom: null
+    containerName: git-sync
+    uid: 65533
+    securityContext: {}
+    securityContexts:
+      container: {}
+    containerLifecycleHooks: {}
+    extraVolumeMounts: []
+    env: []
+    resources: {}
