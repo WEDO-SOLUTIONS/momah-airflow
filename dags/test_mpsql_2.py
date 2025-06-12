@@ -109,7 +109,7 @@ with DAG(
             longitude,
             address_en AS "address",
             contact_info_en AS "contactInfo"
-        FROM get_pois_full_dual_lang_bbox(39.886, 21.415, 39.8875, 21.4135, 'ar');
+        FROM get_pois_full_dual_lang_bbox(21.426891,39.884678,21.400543,39.902234,'en');
     """
 
     # Define parameters for the SQL query.
