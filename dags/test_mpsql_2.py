@@ -69,7 +69,7 @@ def test_postgres_connection_callable(db_conn_id: str, sql_query: str, query_par
 
 # Define the DAG
 with DAG(
-    dag_id="postgres_connection_test_dag",
+    dag_id="postgres_connection_test_dag_with_custom_query",
     start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),
     catchup=False,
     schedule=None,
