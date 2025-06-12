@@ -94,7 +94,7 @@ with DAG(
 ) as dag:
     # IMPORTANT: Replace 'postgres_default' with your actual Airflow PostgreSQL Connection ID
     # This ID must be configured in your Airflow UI (Admin -> Connections)
-    db_connection_id = "postgres_default"
+    db_connection_id = "test_conn"
 
     # Define the new SQL statement you want to test
     # Note: PostgreSQL uses $1, $2, etc., for positional parameters
