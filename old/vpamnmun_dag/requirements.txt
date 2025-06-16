@@ -1,0 +1,6 @@
+# To install all dependencies, run: pip install -r requirements.txt
+requests
+oracledb
+python-dotenv
+tqdm
+python-dateutil

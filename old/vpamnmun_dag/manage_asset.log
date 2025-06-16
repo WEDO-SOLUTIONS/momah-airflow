@@ -1,0 +1,18 @@
+2025-06-12 16:26:04,930 - INFO - [manage_asset.py:200] - Starting Asset Management Script. Operation set to: CREATE
+2025-06-12 16:26:04,942 - INFO - [manage_asset.py:95] - Starting asset 'CREATE' process...
+2025-06-12 16:26:04,942 - INFO - [db_connector.py:16] - DatabaseConnector initialized to use view: "MOMRAH"."V_CCC_SNAPSHOT_PRIORITY_AREAS_NEW_WIP"
+2025-06-12 16:26:04,942 - INFO - [db_connector.py:20] - Connecting to Oracle DB as user 'ACIOPRD' at ruhmpp-exa-scan.momra.net...
+2025-06-12 16:26:05,635 - INFO - [db_connector.py:22] - Oracle DB connection successful. Version: 19.23.0.0.0
+2025-06-12 16:26:20,864 - INFO - [manage_asset.py:33] - Detected columns from view: ['AmanaId', 'AmanaAr', 'Amana_Name', 'MunicipalityId', 'MunicipalityAr', 'MunicipalityEng', 'Priority_Level', 'Date_', 'SOURCE_TABLE', 'VPI', 'COVERAGE', 'TTR', 'REPEAT', 'longitude', 'latitude', 'Coverage_Amana', 'VPI_Amana', 'coverage_target_amana', 'vpi_target_amana', 'StreetInspectedArea', 'StreetArea', 'UNITS_CALULCATED', 'id', 'created_date']
+2025-06-12 16:26:34,687 - INFO - [manage_asset.py:59] - Generated special 'name' attribute 'MunicipalityEng_ns' for primary display.
+2025-06-12 16:27:07,968 - INFO - [db_connector.py:31] - Oracle DB connection closed.
+2025-06-12 16:27:07,970 - INFO - [manage_asset.py:125] - Sending POST request to https://cityview-pro-api.momah.gov.sa/dynamic_asset...
+2025-06-12 16:27:10,812 - INFO - [manage_asset.py:132] - Asset successfully created.
+2025-06-12 16:27:10,812 - INFO - [manage_asset.py:133] - Response: {
+  "asset_id": "user_dyn_KOhPCps45UKrT27uJquGuQ",
+  "task_id": "9EUuiPp59USnzfURIoRnsQ",
+  "access_token": "qXYWTd-XaUCk_tyJcAemCA"
+}
+2025-06-12 16:27:10,813 - INFO - [manage_asset.py:140] - Updating .env file with new asset ID and push token...
+2025-06-12 16:27:10,829 - INFO - [manage_asset.py:145] - .env file updated successfully.
+2025-06-12 16:27:10,829 - INFO - [manage_asset.py:226] - Script finished.

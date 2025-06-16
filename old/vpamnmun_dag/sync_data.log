@@ -1,0 +1,15 @@
+2025-06-12 17:02:46,568 - INFO - [sync_data.py:268] - Starting sync run at 2025-06-12T14:02:46.568026+00:00
+2025-06-12 17:02:46,568 - INFO - [sync_data.py:126] - Performing pre-flight check to ensure asset is available...
+2025-06-12 17:02:48,114 - INFO - [sync_data.py:134] - Pre-flight check successful. Asset is available.
+2025-06-12 17:02:48,116 - INFO - [sync_data.py:58] - Loaded sync state. Last sync at: 2025-06-12T13:27:51.947751+00:00
+2025-06-12 17:02:48,116 - INFO - [db_connector.py:16] - DatabaseConnector initialized to use view: "MOMRAH"."V_CCC_SNAPSHOT_PRIORITY_AREAS_NEW_WIP"
+2025-06-12 17:02:48,116 - INFO - [db_connector.py:20] - Connecting to Oracle DB as user 'ACIOPRD' at ruhmpp-exa-scan.momra.net...
+2025-06-12 17:02:48,858 - INFO - [db_connector.py:22] - Oracle DB connection successful. Version: 19.23.0.0.0
+2025-06-12 17:02:48,859 - INFO - [sync_data.py:148] - Phase 1: Fetching records modified since 2025-06-12T13:27:51.947751+00:00...
+2025-06-12 17:02:53,247 - INFO - [sync_data.py:202] - Phase 2: Detecting deleted records...
+2025-06-12 17:02:58,372 - INFO - [sync_data.py:211] - No records to delete.
+2025-06-12 17:02:58,413 - INFO - [db_connector.py:31] - Oracle DB connection closed.
+2025-06-12 17:02:58,427 - INFO - [sync_data.py:69] - Successfully saved new sync state. Timestamp: 2025-06-12T14:02:46.568026+00:00
+2025-06-12 17:02:58,427 - INFO - [sync_data.py:289] - Sync run completed successfully.
+2025-06-12 17:02:58,427 - INFO - [sync_data.py:263] - Final Stats: {'db_records_read': 0, 'invalid_rows_skipped': 0, 'records_added': 0, 'records_updated': 0, 'records_deleted': 0, 'push_success': 0, 'push_failed': 0, 'delete_success': 0, 'delete_failed': 0, 'api_chunks_success_first_try': 0, 'api_chunks_success_retries': 0, 'api_chunks_failed': 0, 'total_api_retries': 0, 'final_record_count': 5844}
+2025-06-12 17:02:58,427 - INFO - [sync_data.py:296] - Sync run finished at 2025-06-12T14:02:58.427456+00:00. Duration: 0:00:11.859430
